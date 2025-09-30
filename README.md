@@ -1,4 +1,4 @@
-# Speech-to-text finetuned for Virginie Dransard
+# Speech-to-text finetuned for Virginie D.
 
 ## Requirements
 
@@ -20,7 +20,7 @@ Libraries
 - optimize costs
   - 
 
-## Questions for Virginie Dransard
+## Questions for Virginie D.
 
 - Quelles sont vos habitudes d'enregistrements ? Prenez-vous plusieurs petits enregistrements, ou un long ?
   - Objectif : clarifier la nécessité de concaténer les audios
