@@ -1,10 +1,34 @@
 # Speech-to-text finetuned for Virginie D.
 
-## Requirements
+## Dev Setup
 
-Libraries
-- openai
-- python-dotenv
+Create venv and install
+```
+python -m venv .venv
+. .\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+Set env:
+```
+$env:OPENAI_API_KEY="sk-..."
+$env:ALLOWED_ORIGINS="http://localhost:5173"
+```
+
+```
+uvicorn app.main:app --reload --port 8000
+```
+
+```
+streamlit run streamlit_app.py
+```
+
+## Build/run with Docker
+
+```
+docker build -t dransard-transcriber .
+docker run -e OPENAI_API_KEY=sk-... -p 8000:8000 dransard-transcriber
+```
 
 ## Todo
 - finish tests: 
