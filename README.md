@@ -8,8 +8,8 @@ Libraries
 
 ## Todo
 - finish tests: 
-  - transcription
-  - formatting
+  - ~~transcription~~
+  - ~~formatting~~
   - audio format conversion
 - deploy
   - do a basic front-end (Lovable)
