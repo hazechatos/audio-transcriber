@@ -25,10 +25,20 @@ streamlit run streamlit_app.py
 
 ## Build/run with Docker
 
+### Backend (FastAPI)
 ```
 docker build -t dransard-transcriber .
-docker run -e OPENAI_API_KEY=sk-... -p 8000:8000 dransard-transcriber
+docker run --rm -e OPENAI_API_KEY=sk-... -p 8000:8000 dransard-transcriber
 ```
+
+### Streamlit frontend
+Build the Streamlit image (uses `Dockerfile.streamlit`). The container will try to reach the backend at `http://host.docker.internal:8000` by default. Override `API_BASE_URL` if needed.
+```
+docker build -f Dockerfile.streamlit -t dransard-transcriber-streamlit .
+docker run --rm -e API_BASE_URL=http://host.docker.internal:8000 -p 8501:8501 dransard-transcriber-streamlit
+```
+
+Open `http://localhost:8501` and set the API base URL if different.
 
 ## Todo
 - finish tests: 
