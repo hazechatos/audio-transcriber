@@ -6,4 +6,4 @@ typing-extensions
 streamlit
 requests
 python-multipart
-
+asgiref

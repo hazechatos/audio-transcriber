@@ -1,7 +1,10 @@
 .env
+.venv
 
 test_data/
 
 __pycache__/
 
 _tmp_uploads/
+
+id_rsa
