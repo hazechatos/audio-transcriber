@@ -1,4 +1,15 @@
-# Speech-to-text finetuned for Virginie D.
+# Audio Transcription Assistant
+
+This agent transcribes audio in multiple languages and formats the text to produce reports.
+
+It was developed in collaboration with notary professionals who needed a convenient, self-hosted solution to transcribe on-the-go audio statements—typically recorded on a phone—and format them into clean, concise documents.
+
+## Features
+
+- Supports multiple audio formats: .mp3, .mp4, .mpeg, .mpga, .m4a, .wav, .webm
+- Supports 99 languages; this repo defaults to French.
+- Formats transcribed text into a professional document, in different tones.
+- Can be self-hosted.
 
 ## Dev Setup
 
@@ -15,7 +26,7 @@ $env:OPENAI_API_KEY="sk-..."
 $env:ALLOWED_ORIGINS="http://localhost:5173"
 ```
 
-```
+``` 
 uvicorn app.main:app --reload --port 8000
 ```
 
@@ -41,20 +52,8 @@ docker run --rm -e API_BASE_URL=http://host.docker.internal:8000 -p 8501:8501 dr
 Open `http://localhost:8501` and set the API base URL if different.
 
 ## Todo
-- finish tests: 
-  - ~~transcription~~
-  - ~~formatting~~
-  - audio format conversion
-- deploy
-  - do a basic front-end (Lovable)
-  - deploy back-end as a single Python API
 - add security
-  - add login portal
   - block requests with audio files that are too long (or monitor token usage and enforce a daily limit)
-- optimize costs
-  - 
-
-## Questions for Virginie D.
-
-- Quelles sont vos habitudes d'enregistrements ? Prenez-vous plusieurs petits enregistrements, ou un long ?
-  - Objectif : clarifier la nécessité de concaténer les audios
+- refactor front-end:
+  - change Streamlit to a clean React front-end
+  - add a Makefile (or another mean)
