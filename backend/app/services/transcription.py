@@ -4,11 +4,14 @@ from typing import Optional
 from app.clients.openai_client import get_openai_client
 from app.clients.mistral_client import get_mistral_client
 
-def transcribe_audio_file(file_path: Path, *, language: Optional[str] = None, temperature: float = 0.0) -> str:
+PROVIDER = "mistral" # set to "mistral" or "openai" depending on your API subscription
+
+def transcribe_audio_file_openai(file_path: Path, *, language: Optional[str] = None, temperature: float = 0.0) -> str:
     client = get_openai_client()
+    model = "whisper-1"
     with open(file_path, "rb") as f:
         result = client.audio.transcriptions.create(
-            model="whisper-1",
+            model=model,
             file=f,
             language=language,
             temperature=temperature,
@@ -19,7 +22,6 @@ def transcribe_audio_file(file_path: Path, *, language: Optional[str] = None, te
 def transcribe_audio_file_mistral(file_path: Path, *, language: Optional[str] = None, temperature: float = 0.0) -> str:
     client = get_mistral_client()
     model = "voxtral-mini-latest"
-    print("Transcribing using Mistral")
     with open(file_path, "rb") as f:
         result = client.audio.transcriptions.complete(
             model=model,
@@ -32,3 +34,9 @@ def transcribe_audio_file_mistral(file_path: Path, *, language: Optional[str] = 
 
         )
     return getattr(result, "text", "")
+
+def transcribe_audio_file(file_path: Path, *, language: Optional[str], temperature: float):
+    if PROVIDER == "mistral":
+        return transcribe_audio_file_mistral(file_path, language=language, temperature=temperature)
+    elif PROVIDER == "openai":
+        return transcribe_audio_file_openai(file_path, language=language, temperature=temperature)
