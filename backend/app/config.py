@@ -13,6 +13,10 @@ class Settings:
         return os.environ.get("OPENAI_API_KEY", "")
 
     @property
+    def mistral_api_key(self) -> str:
+        return os.environ.get("MISTRAL_API_KEY", "")
+
+    @property
     def allowed_origins(self) -> List[str]:
         raw = os.environ.get("ALLOWED_ORIGINS", "http://localhost:5173")
         return [s.strip() for s in raw.split(",") if s.strip()]
