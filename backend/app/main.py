@@ -7,7 +7,7 @@ from app.routers.transcribe import router as transcribe_router
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="Dransard Transcriber API")
+    app = FastAPI(title="Audio Transcriber API")
 
     app.add_middleware(
         CORSMiddleware,
