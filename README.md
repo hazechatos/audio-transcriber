@@ -1,4 +1,4 @@
-# Audio Transcription Assistant
+# Attorney AI Assistant: An Audio Transcription Tool for Attorneys and Notaries Writing Reports
 
 This agent transcribes audio in multiple languages and formats the text to produce reports.
 
@@ -12,33 +12,175 @@ It was developed in collaboration with notary professionals who needed a conveni
 
 ## Dev Setup
 
-Only Windows is supported for now.
+### Prerequisites
 
-- Install dependencies and set up virtual environments:
+- **Windows** (currently the only supported platform)
+- **Python 3.8+** (for backend)
+- **Node.js 18+** and **npm** (for frontend)
+- **ffmpeg** (only needed for audio format conversion; if not installed, use only .mp3 files)
+  - Download from [ffmpeg.org](https://ffmpeg.org/download.html)
+  - Ensure `ffmpeg` is available in your system PATH
+
+### Environment Configuration
+
+Create a `.env` file at the root of the repository with the following variables:
+
+```env
+# Required: Choose one AI provider
+MISTRAL_API_KEY=your_mistral_api_key_here
+# OR
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Optional: Configure CORS origins
+ALLOWED_ORIGINS=http://localhost:5173
+
+# Optional: Set log level (DEBUG, INFO, WARNING, ERROR)
+LOG_LEVEL=INFO
 ```
+
+**Note:** You only need to provide one API key depending on which provider you want to use. The provider is selected in `backend/app/services/transcription.py` and `backend/app/services/formatting.py` via the `PROVIDER` constant.
+
+### Installation
+
+Install all dependencies and set up virtual environments:
+
+```bash
 make install
 ```
 
-- Run unit tests:
-```
+This command will:
+- Create a Python virtual environment (`.venv-backend`)
+- Install backend dependencies from `backend/requirements.txt`
+- Install frontend dependencies in `frontend/`
+
+### Running Tests
+
+Run the backend unit tests:
+
+```bash
 make test
 ```
 
+### Running the Application
 
-- Run the backend and frontend:
-```
+Start both the backend and frontend servers:
+
+```bash
 make run
 ```
 
-Two terminals open. The first one is the backend process and shows backend logs in an easily-readable format.
+This will open two separate terminal windows:
+1. **Backend** (Port 8000): FastAPI server with detailed logging
+2. **Frontend** (Port 5173): React development server with hot-reload
+
+Once both servers are running, access the app at http://localhost:5173 on your favorite browser.
+
+### Individual Server Commands
+
+You can also run servers individually:
+
+```bash
+# Backend only
+make run-backend
+
+# Frontend only (requires manual setup)
+cd frontend
+npm run dev
+```
 
 
-## Todo
-- add security
-  - block requests with audio files that are too long (or monitor token usage and enforce a daily limit)
-- refactor front-end:
-  - change Streamlit to a clean React front-end
+## Architecture
 
-## Upcoming features:
+The application follows a client-server architecture with a React frontend and a FastAPI backend.
+
+### System Overview
+
+```
+┌─────────────┐         ┌──────────────┐         ┌─────────────┐
+│   Frontend  │────────▶│   Backend    │────────▶│  AI APIs    │
+│  (React)    │  HTTP   │  (FastAPI)   │  API    │ (Mistral/   │
+│             │◀────────│              │◀────────│  OpenAI)    │
+└─────────────┘         └──────────────┘         └─────────────┘
+     Port 5173              Port 8000
+```
+
+### Backend Architecture
+
+The backend is organized into modular components:
+
+#### **Routers** (`backend/app/routers/`)
+- **`transcribe.py`**: Handles audio file uploads and transcription requests
+  - Accepts audio files in multiple formats
+  - Converts unsupported formats to MP3 using ffmpeg
+  - Returns raw and optionally formatted transcripts
+- **`export.py`**: Converts formatted transcripts to DOCX format
+- **`health.py`**: Health check endpoint for monitoring
+
+#### **Services** (`backend/app/services/`)
+- **`transcription.py`**: Core transcription logic with provider abstraction
+  - Supports both Mistral (voxtral-mini-latest) and OpenAI (whisper-1)
+  - Provider selection via `PROVIDER` constant
+- **`formatting.py`**: Formats raw transcripts into professional notary-style documents
+  - Uses LLM (Mistral medium or GPT-4o-mini) to clean and format text
+  - Applies notary-specific formatting rules
+- **`audio_convert.py`**: Audio format conversion utility
+  - Converts unsupported formats to MP3 using ffmpeg
+  - Validates audio format compatibility
+- **`exporter.py`**: DOCX export functionality
+  - Converts markdown/formatted text to DOCX using python-docx
+  - Preserves formatting (headings, lists, bold, italic)
+
+#### **Clients** (`backend/app/clients/`)
+- **`openai_client.py`**: OpenAI API client wrapper
+- **`mistral_client.py`**: Mistral API client wrapper
+- Both clients read API keys from environment variables
+
+#### **Configuration** (`backend/app/config.py`)
+- Centralized settings management
+- Environment variable handling via `python-dotenv`
+- Configurable CORS origins, log levels, and API keys
+
+### Frontend Architecture
+
+The frontend (`frontend/`) is a React application built with:
+- **Vite**: Build tool and dev server
+- **React Router**: Client-side routing
+- **TanStack Query**: Data fetching and state management
+- **shadcn/ui**: UI component library
+- **Tailwind CSS**: Styling
+
+#### Key Components
+- **`Index.tsx`**: Main transcription interface
+  - File upload with drag-and-drop support
+  - Audio preview
+  - Transcription status and results display
+  - Export functionality
+
+### Data Flow
+
+1. **Upload**: User uploads audio file via frontend
+2. **Conversion**: Backend converts to MP3 if needed (using ffmpeg)
+3. **Transcription**: Audio sent to AI provider (Mistral/OpenAI) for speech-to-text
+4. **Formatting** (optional): Raw transcript sent to LLM for professional formatting
+5. **Export**: Formatted text converted to DOCX and downloaded
+
+### Technology Stack
+
+**Backend:**
+- FastAPI (Python web framework)
+- OpenAI SDK / Mistral SDK (AI transcription)
+- python-docx (DOCX generation)
+- ffmpeg (audio conversion)
+- pytest (testing)
+
+**Frontend:**
+- React 18
+- TypeScript
+- Vite
+- TanStack Query
+- shadcn/ui components
+- Tailwind CSS
+
+## Upcoming Features:
 
 - self-hosted version (getting Mistral builds from Hugging Face)
