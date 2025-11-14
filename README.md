@@ -19,12 +19,19 @@ Only Windows is supported for now.
 make install
 ```
 
+- Run unit tests:
+```
+make test
+```
+
+
 - Run the backend and frontend:
 ```
 make run
 ```
 
 Two terminals open. The first one is the backend process and shows backend logs in an easily-readable format.
+
 
 ## Todo
 - add security

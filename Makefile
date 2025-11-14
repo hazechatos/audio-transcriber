@@ -6,7 +6,7 @@ install:
 	.venv-frontend/Scripts/python -m pip install --upgrade pip
 	.venv-frontend/Scripts/python -m pip install -r frontend/requirements.txt
 
-test-backend:
+test:
 	cd backend && ..\\.venv-backend\\Scripts\\python -m pytest
 
 run-backend:
