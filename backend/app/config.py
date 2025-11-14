@@ -21,6 +21,10 @@ class Settings:
         raw = os.environ.get("ALLOWED_ORIGINS", "http://localhost:5173")
         return [s.strip() for s in raw.split(",") if s.strip()]
 
+    @property
+    def log_level(self) -> str:
+        return os.environ.get("LOG_LEVEL", "INFO")
+
 
 settings = Settings()
 
