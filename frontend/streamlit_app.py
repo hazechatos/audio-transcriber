@@ -5,25 +5,16 @@ from typing import Optional
 import requests
 import streamlit as st
 
+api_base="http://localhost:8000"
 
 st.set_page_config(page_title="Notary Transcriber", page_icon="📝", layout="centered")
-st.title("📝 Notary Transcriber - Frontend Test")
-
-default_api = os.environ.get("API_BASE_URL", "http://localhost:8000")
-api_base = st.text_input("API base URL", value=default_api, help="Base URL of FastAPI service")
+st.title("📝 Notary Transcriber")
 
 uploaded = st.file_uploader("Upload an audio file", type=[
     "mp3", "mp4", "mpeg", "mpga", "m4a", "wav", "webm", "wma"
 ])
 
-col1, col2 = st.columns(2)
-with col1:
-    format_output = st.checkbox("Apply notary-style formatting", value=True)
-with col2:
-    language = st.selectbox(
-        "Language (optional)", ["", "fr", "en", "es", "de", "it"], index=1,
-        help="Provide a hint to the ASR model"
-    )
+format_output = st.checkbox("Apply notary-style formatting", value=True)
 
 if uploaded is not None:
     st.audio(uploaded)
@@ -36,8 +27,6 @@ if st.button("Transcribe"):
     try:
         endpoint = api_base.rstrip("/") + "/transcribe"
         params = {"format_output": str(format_output).lower()}
-        if language:
-            params["language"] = language
 
         files = {"file": (uploaded.name, uploaded.getvalue(), uploaded.type or "application/octet-stream")}
         with st.spinner("Transcribing..."):
