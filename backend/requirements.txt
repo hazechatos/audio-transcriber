@@ -26,3 +26,5 @@ uvicorn==0.37.0
 watchfiles==1.1.1
 websockets==15.0.1
 mistralai
+python-docx>=1.1.0
+pytest>=7.0.0
