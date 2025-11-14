@@ -6,6 +6,9 @@ install:
 	.venv-frontend/Scripts/python -m pip install --upgrade pip
 	.venv-frontend/Scripts/python -m pip install -r frontend/requirements.txt
 
+test-backend:
+	cd backend && ..\\.venv-backend\\Scripts\\python -m pytest
+
 run-backend:
 	cd backend && ..\\.venv-backend\\Scripts\\python -m uvicorn app.main:app --reload --port 8000
 
