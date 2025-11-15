@@ -1,9 +1,0 @@
-fastapi
-uvicorn[standard]
-python-dotenv
-openai
-typing-extensions
-streamlit
-requests
-python-multipart
-asgiref

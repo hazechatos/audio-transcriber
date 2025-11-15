@@ -3,10 +3,11 @@ from typing import Optional
 
 from app.clients.openai_client import get_openai_client
 from app.clients.mistral_client import get_mistral_client
+from app.config import settings
 
 logger = logging.getLogger(__name__)
 
-PROVIDER = "mistral"
+PROVIDER = settings.provider
 
 SYSTEM_INSTRUCTION = (
     "You are a professional notary making an observation. "
