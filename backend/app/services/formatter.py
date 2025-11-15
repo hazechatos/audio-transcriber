@@ -76,3 +76,4 @@ def format_transcript(raw_text: str, *, temperature: float = 0.2):
     else:
         logger.error(f"Unknown provider: {PROVIDER}")
         raise ValueError(f"Unknown provider: {PROVIDER}")
+

@@ -4,9 +4,9 @@ from typing import Optional
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
-from app.services.audio_convert import ensure_supported_or_convert_to_mp3
-from app.services.transcription import transcribe_audio_file
-from app.services.formatting import format_transcript
+from app.services.audio_converter import ensure_supported_or_convert_to_mp3
+from app.services.transcriber import transcribe_audio_file
+from app.services.formatter import format_transcript
 
 logger = logging.getLogger(__name__)
 

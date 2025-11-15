@@ -54,3 +54,4 @@ def transcribe_audio_file(file_path: Path, *, language: Optional[str], temperatu
     else:
         logger.error(f"Unknown provider: {PROVIDER}")
         raise ValueError(f"Unknown provider: {PROVIDER}")
+
