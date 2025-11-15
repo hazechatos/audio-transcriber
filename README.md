@@ -1,5 +1,7 @@
 # Attorney AI Assistant: An Audio Transcription Tool for Attorneys and Notaries Writing Reports
 
+**This project was made as part of a Mistral contest.*
+
 This agent transcribes audio in multiple languages and formats the text to produce reports.
 
 It was developed in collaboration with notary professionals who needed a convenient, self-hosted solution to transcribe on-the-go audio statements—typically recorded on a phone—and format them into clean, concise documents.
@@ -14,7 +16,6 @@ It was developed in collaboration with notary professionals who needed a conveni
 
 ### Prerequisites
 
-- **Windows** (currently the only supported platform)
 - **Python 3.8+** (for backend)
 - **Node.js 18+** and **npm** (for frontend)
 - **ffmpeg** (only needed for audio format conversion; if not installed, use only .mp3 files)
@@ -26,12 +27,14 @@ It was developed in collaboration with notary professionals who needed a conveni
 Create a `.env` file at the root of the repository with the following variables:
 
 ```env
-# Required: Choose one AI provider
+# Required: Choose one AI provider (default is set to Mistral, but you still need an API key)
 MISTRAL_API_KEY=your_mistral_api_key_here
+PROVIDER=mistral
 # OR
 OPENAI_API_KEY=your_openai_api_key_here
+PROVIDER=openai
 
-# Optional: Configure CORS origins
+# Optional: Configure CORS origins to allow the front-end service to communicate with the back-end service. By default, FE is running on port 5173.
 ALLOWED_ORIGINS=http://localhost:5173
 
 # Optional: Set log level (DEBUG, INFO, WARNING, ERROR)
