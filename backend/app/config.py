@@ -25,6 +25,10 @@ class Settings:
     def log_level(self) -> str:
         return os.environ.get("LOG_LEVEL", "INFO")
 
+    @property
+    def provider(self) -> str:
+        return os.environ.get("PROVIDER", "mistral")
+
 
 settings = Settings()
 

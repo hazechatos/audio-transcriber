@@ -4,10 +4,11 @@ from typing import Optional
 
 from app.clients.openai_client import get_openai_client
 from app.clients.mistral_client import get_mistral_client
+from app.config import settings
 
 logger = logging.getLogger(__name__)
 
-PROVIDER = "mistral" # set to "mistral" or "openai" depending on your API subscription
+PROVIDER = settings.provider
 
 def transcribe_audio_file_openai(file_path: Path, *, language: Optional[str] = None, temperature: float = 0.0) -> str:
     logger.info(f"Starting OpenAI transcription: {file_path} (language={language}, temperature={temperature})")
