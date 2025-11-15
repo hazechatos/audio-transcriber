@@ -14,10 +14,18 @@ install:
 	cd frontend && npm i
 
 test:
+ifeq ($(OS),Windows_NT)
+	powershell -NoProfile -Command "cd backend; $(PYTHON_REL) -m pytest"
+else
 	cd backend && $(PYTHON_REL) -m pytest
+endif
 
 run-backend:
+ifeq ($(OS),Windows_NT)
+	powershell -NoProfile -Command "cd backend; $(PYTHON_REL) -m uvicorn app.main:app --reload --port 8000"
+else
 	cd backend && $(PYTHON_REL) -m uvicorn app.main:app --reload --port 8000
+endif
 
 run-frontend:
 	cd frontend && npm run dev
