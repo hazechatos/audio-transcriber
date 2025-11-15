@@ -10,10 +10,12 @@ For ease of use, this repository integrates with LLM API providers (Mistral and 
 
 ## Features
 
+- Formats transcribed text into a professional document, in notary tone and format.
+- Export result to `.docx`.
 - Supports multiple audio formats: .mp3, .mp4, .mpeg, .mpga, .m4a, .wav, .webm
 - Supports 2 languages: English and French.
-- Formats transcribed text into a professional document, in different tones.
-- Export to 
+- Support both Mistral and OpenAI APIs.
+
 ## Dev Setup
 
 ### Prerequisites
@@ -73,7 +75,7 @@ This will open two separate terminal windows:
 1. **Backend** (Port 8000): FastAPI server with detailed logging
 2. **Frontend** (Port 5173): React development server with hot-reload
 
-Once both servers are running, access the app at http://localhost:5173 on your favorite browser.
+Once both servers are running, access the app at http://localhost:5173 on your favorite browser. You can use audio files provided in directory `demo_audio`.
 
 ### Individual Server Commands
 
@@ -191,4 +193,3 @@ The frontend (`frontend/`) is a React application built with:
 ## Todo
 - rename services: formatter, transcriber..
 - add unit tests for each service
-- add demo test files to repo (record it myself)
