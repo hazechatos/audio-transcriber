@@ -190,8 +190,3 @@ The frontend (`frontend/`) is a React application built with:
 ![Image1](docs/frontend-img/ui-1.png)
 
 ![Image2](docs/frontend-img/ui-2.png)
-
-
-## Todo
-- rename services: formatter, transcriber..
-- add unit tests for each service
