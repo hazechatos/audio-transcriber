@@ -1,17 +1,19 @@
-# Attorney AI Assistant: An Audio Transcription Tool for Attorneys and Notaries Writing Reports
+# Attorney AI Assistant: An Audio Transcription Tool for Attorneys and Notaries
 
-**This project was made as part of a Mistral contest.*
+*Created as part of a Mistral community contest.*
 
-This agent transcribes audio in multiple languages and formats the text to produce reports.
+**Attorney AI Assistant** is a multilingual audio-to-text tool designed to help attorneys and notaries quickly turn recorded statements into clear, structured reports. It supports common mobile-recorded audio formats and produces clean, professionally formatted text suitable for legal documentation.
 
-It was developed in collaboration with notary professionals who needed a convenient, self-hosted solution to transcribe on-the-go audio statements—typically recorded on a phone—and format them into clean, concise documents.
+The project was developed in collaboration with notary professionals who needed a fast, reliable way to transcribe on-the-go audio—typically captured on a phone—without sacrificing accuracy or confidentiality.
+
+For ease of use, this repository integrates with LLM API providers (Mistral and OpenAI supported). However, the intended deployment is fully self-hosted, running locally with open-source models such as Voxtral and Mistral to ensure complete data privacy for legal practitioners.
 
 ## Features
 
 - Supports multiple audio formats: .mp3, .mp4, .mpeg, .mpga, .m4a, .wav, .webm
 - Supports 2 languages: English and French.
 - Formats transcribed text into a professional document, in different tones.
-
+- Export to 
 ## Dev Setup
 
 ### Prerequisites
@@ -45,16 +47,11 @@ LOG_LEVEL=INFO
 
 ### Installation
 
-Install all dependencies and set up virtual environments:
+Install all dependencies and set up a back-end virtual environment:
 
 ```bash
 make install
 ```
-
-This command will:
-- Create a Python virtual environment (`.venv-backend`)
-- Install backend dependencies from `backend/requirements.txt`
-- Install frontend dependencies in `frontend/`
 
 ### Running Tests
 
@@ -184,6 +181,14 @@ The frontend (`frontend/`) is a React application built with:
 - shadcn/ui components
 - Tailwind CSS
 
-## Upcoming Features:
+## UI Showcase
 
-- self-hosted version (getting Mistral builds from Hugging Face)
+![Image1](docs/frontend-img/ui-1.png)
+
+![Image2](docs/frontend-img/ui-2.png)
+
+
+## Todo
+- rename services: formatter, transcriber..
+- add unit tests for each service
+- add demo test files to repo (record it myself)
