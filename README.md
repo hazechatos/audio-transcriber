@@ -1,9 +1,5 @@
 # Attorney AI Assistant: An Audio Transcription Tool for Attorneys and Notaries
 
-<img src="docs/misc-img/Mistral_AI_logo_(2025).png" alt="Mistral AI Logo" width="100">
-
-*Created as part of a Mistral community contest.*
-
 **Attorney AI Assistant** is a multilingual audio-to-text tool designed to help attorneys and notaries quickly turn recorded statements into clear, structured reports. It supports common mobile-recorded audio formats and produces clean, professionally formatted text suitable for legal documentation.
 
 The project was developed in collaboration with notary professionals who needed a fast, reliable way to transcribe on-the-go audio—typically captured on a phone—without sacrificing accuracy or confidentiality.
