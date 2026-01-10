@@ -5,16 +5,22 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, FileAudio, Loader2, Download, AlertCircle } from "lucide-react";
+import { Upload, Loader2, Download, AlertCircle } from "lucide-react";
+import FileList from "@/components/FileList";
 
 interface TranscriptionResponse {
   text: string | null;
   formattedText: string | null;
 }
 
+interface FileWithUrl {
+  file: File;
+  url: string;
+  id: string;
+}
+
 const Index = () => {
-  const [file, setFile] = useState<File | null>(null);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [files, setFiles] = useState<FileWithUrl[]>([]);
   const [applyFormatting, setApplyFormatting] = useState(true);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -28,19 +34,37 @@ const Index = () => {
     ".mp3", ".mp4", ".mpeg", ".mpga", ".m4a", ".wav", ".webm", ".wma"
   ].join(",");
 
-  const handleFileChange = (selectedFile: File | null) => {
-    if (!selectedFile) return;
+  const addFiles = (newFiles: FileList | File[]) => {
+    const fileArray = Array.from(newFiles);
+    const newFileItems: FileWithUrl[] = fileArray.map((file) => ({
+      file,
+      url: URL.createObjectURL(file),
+      id: `${file.name}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    }));
     
-    setFile(selectedFile);
+    setFiles((prev) => [...prev, ...newFileItems]);
     setError("");
-    
-    // Create audio URL for preview
-    const url = URL.createObjectURL(selectedFile);
-    setAudioUrl(url);
-    
-    // Clear previous transcripts
-    setRawTranscript("");
-    setFormattedTranscript("");
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      addFiles(e.target.files);
+      e.target.value = "";
+    }
+  };
+
+  const handleReorder = (reorderedFiles: FileWithUrl[]) => {
+    setFiles(reorderedFiles);
+  };
+
+  const handleRemove = (id: string) => {
+    setFiles((prev) => {
+      const fileToRemove = prev.find((f) => f.id === id);
+      if (fileToRemove) {
+        URL.revokeObjectURL(fileToRemove.url);
+      }
+      return prev.filter((f) => f.id !== id);
+    });
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -52,25 +76,30 @@ const Index = () => {
     e.preventDefault();
     e.stopPropagation();
     
-    const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile) {
-      handleFileChange(droppedFile);
+    if (e.dataTransfer.files.length > 0) {
+      addFiles(e.dataTransfer.files);
     }
   };
 
   const handleTranscribe = async () => {
-    if (!file) {
-      setError("Please upload a file first.");
+    if (files.length === 0) {
+      setError("Please upload at least one file first.");
       return;
     }
 
     setIsTranscribing(true);
     setError("");
-
-    const formData = new FormData();
-    formData.append("file", file);
+    setRawTranscript("");
+    setFormattedTranscript("");
 
     try {
+      const formData = new FormData();
+      
+      // Append all files to a single FormData with the key "files"
+      files.forEach((fileItem) => {
+        formData.append("files", fileItem.file);
+      });
+
       const response = await fetch(
         `http://localhost:8000/transcribe?format_output=${applyFormatting}`,
         {
@@ -85,12 +114,13 @@ const Index = () => {
       }
 
       const data: TranscriptionResponse = await response.json();
+      
       setRawTranscript(data.text || "");
       setFormattedTranscript(data.formattedText || "");
 
       toast({
         title: "Transcription complete",
-        description: "Your audio has been successfully transcribed.",
+        description: `Successfully transcribed ${files.length} file${files.length !== 1 ? "s" : ""}.`,
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to transcribe";
@@ -177,7 +207,7 @@ const Index = () => {
         <Card className="p-8 shadow-lg space-y-6">
           {/* File Upload */}
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">Upload Audio File</h2>
+            <h2 className="text-xl font-semibold text-foreground">Upload Audio Files</h2>
             <div
               onDragOver={handleDragOver}
               onDrop={handleDrop}
@@ -188,7 +218,8 @@ const Index = () => {
                 ref={fileInputRef}
                 type="file"
                 accept={acceptedFileTypes}
-                onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
+                multiple
+                onChange={handleFileChange}
                 className="hidden"
               />
               <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
@@ -200,18 +231,12 @@ const Index = () => {
               </p>
             </div>
 
-            {/* File Preview */}
-            {file && audioUrl && (
-              <div className="bg-secondary/50 rounded-lg p-4 space-y-3">
-                <div className="flex items-center gap-3">
-                  <FileAudio className="h-5 w-5 text-primary" />
-                  <span className="text-foreground font-medium">{file.name}</span>
-                </div>
-                <audio controls className="w-full" src={audioUrl}>
-                  Your browser does not support the audio element.
-                </audio>
-              </div>
-            )}
+            {/* File List */}
+            <FileList
+              files={files}
+              onReorder={handleReorder}
+              onRemove={handleRemove}
+            />
           </div>
 
           {/* Options */}
@@ -235,7 +260,7 @@ const Index = () => {
           {/* Transcribe Button */}
           <Button
             onClick={handleTranscribe}
-            disabled={!file || isTranscribing}
+            disabled={files.length === 0 || isTranscribing}
             className="w-full"
             size="lg"
           >
