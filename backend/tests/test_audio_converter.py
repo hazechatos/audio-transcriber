@@ -8,6 +8,8 @@ from app.services.audio_converter import (
     SUPPORTED_AUDIO_EXTS,
     ensure_supported_or_convert_to_mp3,
     is_supported_audio,
+    concatenate_multi_files,
+    preprocess,
 )
 
 
@@ -167,4 +169,74 @@ def test_ensure_supported_or_convert_to_mp3_output_file_missing(
                 ensure_supported_or_convert_to_mp3(src_path)
     finally:
         src_path.unlink(missing_ok=True)
+
+
+@patch("app.services.audio_converter.subprocess.run")
+def test_concatenate_multi_files_multiple_files_success(mock_subprocess_run):
+    with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tf1, tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tf2:
+        p1 = Path(tf1.name); p2 = Path(tf2.name)
+
+    def create_output_file(*args, **kwargs):
+        cmd = args[0] if args else kwargs.get("args", [])
+        if len(cmd) > 0 and cmd[0] == "ffmpeg":
+            output_path = Path(cmd[-1])
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.touch()
+        return MagicMock()
+
+    mock_subprocess_run.side_effect = create_output_file
+
+    try:
+        result = concatenate_multi_files([p1, p2])
+        assert result.suffix == ".mp3"
+        assert result.exists()
+        mock_subprocess_run.assert_called()
+        if result.parent.exists():
+            import shutil
+            shutil.rmtree(result.parent, ignore_errors=True)
+    finally:
+        p1.unlink(missing_ok=True)
+        p2.unlink(missing_ok=True)
+
+
+def test_concatenate_multi_files_single_file():
+    with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tf:
+        p = Path(tf.name)
+    try:
+        result = concatenate_multi_files([p])
+        assert result == p
+    finally:
+        p.unlink(missing_ok=True)
+
+
+@patch("app.services.audio_converter.ensure_supported_or_convert_to_mp3")
+@patch("app.services.audio_converter.subprocess.run")
+def test_preprocess_with_multiple_files(mock_subprocess_run, mock_ensure):
+    # Simulate per-file conversion to mp3 by ensure_supported_or_convert_to_mp3
+    def ensure_side(src):
+        return Path(str(src.with_suffix(".mp3")))
+    mock_ensure.side_effect = ensure_side
+
+    def create_output_file(*args, **kwargs):
+        cmd = args[0] if args else kwargs.get("args", [])
+        if cmd and cmd[0] == "ffmpeg":
+            output_path = Path(cmd[-1])
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.touch()
+        return MagicMock()
+
+    mock_subprocess_run.side_effect = create_output_file
+
+    with tempfile.NamedTemporaryFile(suffix=".flac", delete=False) as f1, tempfile.NamedTemporaryFile(suffix=".flac", delete=False) as f2:
+        p1 = Path(f1.name); p2 = Path(f2.name)
+    try:
+        result = preprocess([p1, p2])
+        assert result.suffix == ".mp3"
+        assert result.exists()
+        mock_subprocess_run.assert_called()
+    finally:
+        p1.unlink(missing_ok=True); p2.unlink(missing_ok=True)
+        if result.parent.exists():
+            import shutil
+            shutil.rmtree(result.parent, ignore_errors=True)
 
