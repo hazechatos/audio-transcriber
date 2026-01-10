@@ -92,38 +92,31 @@ const Index = () => {
     setRawTranscript("");
     setFormattedTranscript("");
 
-    let allRawText = "";
-    let allFormattedText = "";
-
     try {
-      for (const fileItem of files) {
-        const formData = new FormData();
-        formData.append("file", fileItem.file);
+      const formData = new FormData();
+      
+      // Append all files to a single FormData with the key "files"
+      files.forEach((fileItem) => {
+        formData.append("files", fileItem.file);
+      });
 
-        const response = await fetch(
-          `http://localhost:8000/transcribe?format_output=${applyFormatting}`,
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
+      const response = await fetch(
+        `http://localhost:8000/transcribe?format_output=${applyFormatting}`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`Error ${response.status} for ${fileItem.file.name}: ${errorText}`);
-        }
-
-        const data: TranscriptionResponse = await response.json();
-        if (data.text) {
-          allRawText += (allRawText ? "\n\n---\n\n" : "") + data.text;
-        }
-        if (data.formattedText) {
-          allFormattedText += (allFormattedText ? "\n\n---\n\n" : "") + data.formattedText;
-        }
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Error ${response.status}: ${errorText}`);
       }
 
-      setRawTranscript(allRawText);
-      setFormattedTranscript(allFormattedText);
+      const data: TranscriptionResponse = await response.json();
+      
+      setRawTranscript(data.text || "");
+      setFormattedTranscript(data.formattedText || "");
 
       toast({
         title: "Transcription complete",
