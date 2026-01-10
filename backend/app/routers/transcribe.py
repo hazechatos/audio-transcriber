@@ -4,7 +4,7 @@ from typing import Optional
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
-from app.services.audio_converter import preprocess
+from app.services.preprocessor import preprocess
 from app.services.transcriber import transcribe_audio_file
 from app.services.formatter import format_transcript
 

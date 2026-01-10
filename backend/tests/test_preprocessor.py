@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from app.services.audio_converter import (
+from app.services.preprocessor import (
     SUPPORTED_AUDIO_EXTS,
     ensure_supported_or_convert_to_mp3,
     is_supported_audio,
@@ -50,7 +50,7 @@ def test_ensure_supported_or_convert_to_mp3_already_supported():
             src_path.unlink(missing_ok=True)
 
 
-@patch("app.services.audio_converter.shutil.which")
+@patch("app.services.preprocessor.shutil.which")
 def test_ensure_supported_or_convert_to_mp3_ffmpeg_not_found(mock_which):
     """Test ensure_supported_or_convert_to_mp3 raises RuntimeError when ffmpeg is not found."""
     mock_which.return_value = None
@@ -65,8 +65,8 @@ def test_ensure_supported_or_convert_to_mp3_ffmpeg_not_found(mock_which):
         src_path.unlink(missing_ok=True)
 
 
-@patch("app.services.audio_converter.subprocess.run")
-@patch("app.services.audio_converter.shutil.which")
+@patch("app.services.preprocessor.subprocess.run")
+@patch("app.services.preprocessor.shutil.which")
 def test_ensure_supported_or_convert_to_mp3_conversion_success(
     mock_which, mock_subprocess_run
 ):
@@ -108,8 +108,8 @@ def test_ensure_supported_or_convert_to_mp3_conversion_success(
         src_path.unlink(missing_ok=True)
 
 
-@patch("app.services.audio_converter.subprocess.run")
-@patch("app.services.audio_converter.shutil.which")
+@patch("app.services.preprocessor.subprocess.run")
+@patch("app.services.preprocessor.shutil.which")
 def test_ensure_supported_or_convert_to_mp3_conversion_failure(
     mock_which, mock_subprocess_run
 ):
@@ -134,8 +134,8 @@ def test_ensure_supported_or_convert_to_mp3_conversion_failure(
         src_path.unlink(missing_ok=True)
 
 
-@patch("app.services.audio_converter.subprocess.run")
-@patch("app.services.audio_converter.shutil.which")
+@patch("app.services.preprocessor.subprocess.run")
+@patch("app.services.preprocessor.shutil.which")
 def test_ensure_supported_or_convert_to_mp3_output_file_missing(
     mock_which, mock_subprocess_run
 ):
@@ -171,7 +171,7 @@ def test_ensure_supported_or_convert_to_mp3_output_file_missing(
         src_path.unlink(missing_ok=True)
 
 
-@patch("app.services.audio_converter.subprocess.run")
+@patch("app.services.preprocessor.subprocess.run")
 def test_concatenate_multi_files_multiple_files_success(mock_subprocess_run):
     with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tf1, tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tf2:
         p1 = Path(tf1.name); p2 = Path(tf2.name)
@@ -209,8 +209,8 @@ def test_concatenate_multi_files_single_file():
         p.unlink(missing_ok=True)
 
 
-@patch("app.services.audio_converter.ensure_supported_or_convert_to_mp3")
-@patch("app.services.audio_converter.subprocess.run")
+@patch("app.services.preprocessor.ensure_supported_or_convert_to_mp3")
+@patch("app.services.preprocessor.subprocess.run")
 def test_preprocess_with_multiple_files(mock_subprocess_run, mock_ensure):
     # Simulate per-file conversion to mp3 by ensure_supported_or_convert_to_mp3
     def ensure_side(src):
