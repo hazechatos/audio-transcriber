@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { FileAudio, GripVertical, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import AudioPlayer from "@/components/AudioPlayer";
 
 interface FileWithUrl {
   file: File;
@@ -101,9 +102,7 @@ const FileList = ({ files, onReorder, onRemove }: FileListProps) => {
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            <audio controls className="w-full h-8" src={fileItem.url}>
-              Your browser does not support the audio element.
-            </audio>
+            <AudioPlayer src={fileItem.url} />
           </div>
         ))}
       </div>
