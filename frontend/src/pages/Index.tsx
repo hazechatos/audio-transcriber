@@ -4,6 +4,13 @@ import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, Loader2, Download, AlertCircle } from "lucide-react";
 import FileList from "@/components/FileList";
@@ -19,8 +26,80 @@ interface FileWithUrl {
   id: string;
 }
 
+type Language = "en" | "fr";
+
+const translations = {
+  en: {
+    language: "Language",
+    english: "English",
+    french: "French",
+    appTitle: "Notary Transcriber",
+    appSubtitle: "Upload audio, transcribe, and export as notary-style DOCX.",
+    uploadSectionTitle: "Upload Audio Files",
+    uploadPrompt: "Click to upload or drag and drop",
+    supportedFormats: "Supported formats: MP3, MP4, WAV, WEBM, M4A, WMA",
+    optionsTitle: "Options",
+    applyFormatting: "Apply notary-style formatting",
+    transcribe: "Transcribe",
+    transcribing: "Transcribing...",
+    rawTranscriptTitle: "Raw Transcript",
+    rawTranscriptPlaceholder: "Raw transcript will appear here...",
+    formattedTranscriptTitle: "Formatted Transcript",
+    formattedTranscriptPlaceholder: "Formatted transcript will appear here...",
+    exporting: "Exporting to DOCX...",
+    export: "Export to DOCX",
+    dragToReorder: "Drag to reorder",
+    noFilesError: "Please upload at least one file first.",
+    transcriptionCompleteTitle: "Transcription complete",
+    transcriptionCompleteDescription: (count: number) =>
+      `Successfully transcribed ${count} file${count !== 1 ? "s" : ""}.`,
+    transcriptionFailedTitle: "Transcription failed",
+    failedToTranscribe: "Failed to transcribe",
+    exportSuccessTitle: "Export successful",
+    exportSuccessDescription: "Your download should start automatically.",
+    exportFailedTitle: "Export failed",
+    failedToExport: "Failed to export",
+    selectedFilesLabel: (count: number) =>
+      `${count} file${count !== 1 ? "s" : ""} selected`,
+  },
+  fr: {
+    language: "Langue",
+    english: "Anglais",
+    french: "Français",
+    appTitle: "Transcripteur notarial",
+    appSubtitle: "Téléversez l'audio, transcrivez et exportez en DOCX de style notarial.",
+    uploadSectionTitle: "Téléverser des fichiers audio",
+    uploadPrompt: "Cliquez pour téléverser ou glissez-déposez",
+    supportedFormats: "Formats pris en charge : MP3, MP4, WAV, WEBM, M4A, WMA",
+    optionsTitle: "Options",
+    applyFormatting: "Appliquer le formatage de style notarial",
+    transcribe: "Transcrire",
+    transcribing: "Transcription en cours...",
+    rawTranscriptTitle: "Transcription brute",
+    rawTranscriptPlaceholder: "La transcription brute apparaîtra ici...",
+    formattedTranscriptTitle: "Transcription formatée",
+    formattedTranscriptPlaceholder: "La transcription formatée apparaîtra ici...",
+    exporting: "Exportation en DOCX...",
+    export: "Exporter en DOCX",
+    dragToReorder: "Glisser pour réorganiser",
+    noFilesError: "Veuillez d'abord téléverser au moins un fichier.",
+    transcriptionCompleteTitle: "Transcription terminée",
+    transcriptionCompleteDescription: (count: number) =>
+      `${count} fichier${count > 1 ? "s" : ""} transcrit${count > 1 ? "s" : ""} avec succès.`,
+    transcriptionFailedTitle: "Échec de la transcription",
+    failedToTranscribe: "Échec de la transcription",
+    exportSuccessTitle: "Exportation réussie",
+    exportSuccessDescription: "Le téléchargement devrait démarrer automatiquement.",
+    exportFailedTitle: "Échec de l'exportation",
+    failedToExport: "Échec de l'exportation",
+    selectedFilesLabel: (count: number) =>
+      `${count} fichier${count > 1 ? "s" : ""} sélectionné${count > 1 ? "s" : ""}`,
+  },
+} as const;
+
 const Index = () => {
   const [files, setFiles] = useState<FileWithUrl[]>([]);
+  const [language, setLanguage] = useState<Language>("fr");
   const [applyFormatting, setApplyFormatting] = useState(true);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -29,9 +108,10 @@ const Index = () => {
   const [error, setError] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const t = translations[language];
 
   const acceptedFileTypes = [
-    ".mp3", ".mp4", ".mpeg", ".mpga", ".m4a", ".wav", ".webm", ".wma"
+    ".mp3", ".mp4", ".mpeg", ".mpga", ".m4a", ".wav", ".webm", ".wma",
   ].join(",");
 
   const addFiles = (newFiles: FileList | File[]) => {
@@ -41,7 +121,7 @@ const Index = () => {
       url: URL.createObjectURL(file),
       id: `${file.name}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     }));
-    
+
     setFiles((prev) => [...prev, ...newFileItems]);
     setError("");
   };
@@ -75,7 +155,7 @@ const Index = () => {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (e.dataTransfer.files.length > 0) {
       addFiles(e.dataTransfer.files);
     }
@@ -83,7 +163,7 @@ const Index = () => {
 
   const handleTranscribe = async () => {
     if (files.length === 0) {
-      setError("Please upload at least one file first.");
+      setError(t.noFilesError);
       return;
     }
 
@@ -94,8 +174,6 @@ const Index = () => {
 
     try {
       const formData = new FormData();
-      
-      // Append all files to a single FormData with the key "files"
       files.forEach((fileItem) => {
         formData.append("files", fileItem.file);
       });
@@ -105,7 +183,7 @@ const Index = () => {
         {
           method: "POST",
           body: formData,
-        }
+        },
       );
 
       if (!response.ok) {
@@ -114,19 +192,19 @@ const Index = () => {
       }
 
       const data: TranscriptionResponse = await response.json();
-      
+
       setRawTranscript(data.text || "");
       setFormattedTranscript(data.formattedText || "");
 
       toast({
-        title: "Transcription complete",
-        description: `Successfully transcribed ${files.length} file${files.length !== 1 ? "s" : ""}.`,
+        title: t.transcriptionCompleteTitle,
+        description: t.transcriptionCompleteDescription(files.length),
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to transcribe";
+      const errorMessage = err instanceof Error ? err.message : t.failedToTranscribe;
       setError(errorMessage);
       toast({
-        title: "Transcription failed",
+        title: t.transcriptionFailedTitle,
         description: errorMessage,
         variant: "destructive",
       });
@@ -166,14 +244,14 @@ const Index = () => {
       document.body.removeChild(a);
 
       toast({
-        title: "Export successful",
-        description: "Your download should start automatically.",
+        title: t.exportSuccessTitle,
+        description: t.exportSuccessDescription,
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to export";
+      const errorMessage = err instanceof Error ? err.message : t.failedToExport;
       setError(errorMessage);
       toast({
-        title: "Export failed",
+        title: t.exportFailedTitle,
         description: errorMessage,
         variant: "destructive",
       });
@@ -185,17 +263,28 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background py-8 px-4">
       <div className="max-w-4xl mx-auto space-y-8">
-        {/* Header */}
-        <header className="text-center space-y-2">
-          <h1 className="text-4xl font-bold text-foreground flex items-center justify-center gap-2">
-            📝 Notary Transcriber
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            Upload audio, transcribe, and export as notary-style DOCX.
-          </p>
+        <div className="flex justify-end">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">{t.language}</span>
+            <Select value={language} onValueChange={(value) => setLanguage(value as Language)}>
+              <SelectTrigger className="w-48">
+                <SelectValue>
+                  {language === "fr" ? `🇫🇷 ${t.french}` : `🇬🇧 ${t.english}`}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="fr">🇫🇷 {t.french}</SelectItem>
+                <SelectItem value="en">🇬🇧 {t.english}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <header className="space-y-2 text-center">
+          <h1 className="text-4xl font-bold text-foreground">{t.appTitle}</h1>
+          <p className="text-lg text-muted-foreground">{t.appSubtitle}</p>
         </header>
 
-        {/* Error Alert */}
         {error && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
@@ -203,16 +292,14 @@ const Index = () => {
           </Alert>
         )}
 
-        {/* Main Card */}
-        <Card className="p-8 shadow-lg space-y-6">
-          {/* File Upload */}
+        <Card className="space-y-6 p-8 shadow-lg">
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">Upload Audio Files</h2>
+            <h2 className="text-xl font-semibold text-foreground">{t.uploadSectionTitle}</h2>
             <div
               onDragOver={handleDragOver}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-primary hover:bg-accent/5 transition-all"
+              className="cursor-pointer rounded-lg border-2 border-dashed border-border p-8 text-center transition-all hover:border-primary hover:bg-accent/5"
             >
               <input
                 ref={fileInputRef}
@@ -222,26 +309,22 @@ const Index = () => {
                 onChange={handleFileChange}
                 className="hidden"
               />
-              <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-foreground font-medium mb-2">
-                Click to upload or drag and drop
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Supported formats: MP3, MP4, WAV, WEBM, M4A, WMA
-              </p>
+              <Upload className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+              <p className="mb-2 font-medium text-foreground">{t.uploadPrompt}</p>
+              <p className="text-sm text-muted-foreground">{t.supportedFormats}</p>
             </div>
 
-            {/* File List */}
             <FileList
               files={files}
               onReorder={handleReorder}
               onRemove={handleRemove}
+              selectedFilesLabel={t.selectedFilesLabel(files.length)}
+              dragToReorderLabel={t.dragToReorder}
             />
           </div>
 
-          {/* Options */}
           <div className="space-y-3">
-            <h2 className="text-xl font-semibold text-foreground">Options</h2>
+            <h2 className="text-xl font-semibold text-foreground">{t.optionsTitle}</h2>
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="formatting"
@@ -250,14 +333,13 @@ const Index = () => {
               />
               <label
                 htmlFor="formatting"
-                className="text-sm font-medium text-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                className="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
-                Apply notary-style formatting
+                {t.applyFormatting}
               </label>
             </div>
           </div>
 
-          {/* Transcribe Button */}
           <Button
             onClick={handleTranscribe}
             disabled={files.length === 0 || isTranscribing}
@@ -267,42 +349,38 @@ const Index = () => {
             {isTranscribing ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Transcribing...
+                {t.transcribing}
               </>
             ) : (
-              "Transcribe"
+              t.transcribe
             )}
           </Button>
         </Card>
 
-        {/* Transcript Display */}
         {(rawTranscript || formattedTranscript) && (
           <div className="space-y-6">
-            {/* Raw Transcript */}
-            <Card className="p-6 shadow-lg space-y-4">
-              <h2 className="text-xl font-semibold text-foreground">Raw Transcript</h2>
+            <Card className="space-y-4 p-6 shadow-lg">
+              <h2 className="text-xl font-semibold text-foreground">{t.rawTranscriptTitle}</h2>
               <Textarea
                 value={rawTranscript}
                 onChange={(e) => setRawTranscript(e.target.value)}
-                placeholder="Raw transcript will appear here..."
+                placeholder={t.rawTranscriptPlaceholder}
                 className="min-h-[200px] font-mono text-sm"
               />
             </Card>
 
-            {/* Formatted Transcript */}
             {formattedTranscript && (
-              <Card className="p-6 shadow-lg space-y-4">
-                <h2 className="text-xl font-semibold text-foreground">Formatted Transcript</h2>
+              <Card className="space-y-4 p-6 shadow-lg">
+                <h2 className="text-xl font-semibold text-foreground">{t.formattedTranscriptTitle}</h2>
                 <Textarea
                   value={formattedTranscript}
                   onChange={(e) => setFormattedTranscript(e.target.value)}
-                  placeholder="Formatted transcript will appear here..."
+                  placeholder={t.formattedTranscriptPlaceholder}
                   className="min-h-[300px] font-mono text-sm"
                 />
               </Card>
             )}
 
-            {/* Export Button */}
             {formattedTranscript && (
               <Card className="p-6 shadow-lg">
                 <Button
@@ -314,12 +392,12 @@ const Index = () => {
                   {isExporting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Exporting to DOCX...
+                      {t.exporting}
                     </>
                   ) : (
                     <>
                       <Download className="mr-2 h-4 w-4" />
-                      Export to DOCX
+                      {t.export}
                     </>
                   )}
                 </Button>
