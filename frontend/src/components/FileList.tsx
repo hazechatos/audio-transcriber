@@ -13,9 +13,17 @@ interface FileListProps {
   files: FileWithUrl[];
   onReorder: (files: FileWithUrl[]) => void;
   onRemove: (id: string) => void;
+  selectedFilesLabel: string;
+  dragToReorderLabel: string;
 }
 
-const FileList = ({ files, onReorder, onRemove }: FileListProps) => {
+const FileList = ({
+  files,
+  onReorder,
+  onRemove,
+  selectedFilesLabel,
+  dragToReorderLabel,
+}: FileListProps) => {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
@@ -61,9 +69,9 @@ const FileList = ({ files, onReorder, onRemove }: FileListProps) => {
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-muted-foreground">
-          {files.length} file{files.length !== 1 ? "s" : ""} selected
+          {selectedFilesLabel}
         </h3>
-        <p className="text-xs text-muted-foreground">Drag to reorder</p>
+        <p className="text-xs text-muted-foreground">{dragToReorderLabel}</p>
       </div>
       <div className="space-y-2">
         {files.map((fileItem, index) => (
